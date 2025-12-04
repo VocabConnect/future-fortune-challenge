@@ -1,0 +1,567 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Future Fortune Challenge — Interactive (Style A)</title>
+  <style>
+    :root {
+      --bg: #f7fbff;
+      --card: #fff;
+      --accent: #0b63d6;
+      --muted: #6b7280;
+    }
+    
+    * {
+      box-sizing: border-box;
+      font-family: Inter, system-ui, Segoe UI, Roboto, 'Helvetica Neue', Arial;
+    }
+    
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, var(--bg), #eef6ff);
+      min-height: 100vh;
+      color: #0f172a;
+    }
+    
+    .wrap {
+      max-width: 980px;
+      margin: 28px auto;
+      padding: 22px;
+    }
+    
+    header {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    
+    h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 0;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    
+    .btn.ghost {
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid rgba(11, 99, 214, 0.12);
+    }
+    
+    .panel {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 18px;
+      margin-top: 18px;
+    }
+    
+    .card {
+      background: var(--card);
+      padding: 22px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(11, 99, 214, 0.06);
+    }
+    
+    .prompt {
+      font-size: 18px;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .meta {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 12px;
+    }
+    
+    .tag {
+      background: rgba(11, 99, 214, 0.08);
+      color: var(--accent);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    
+    .score {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .chip {
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid #e6eefc;
+      background: #fff;
+      cursor: pointer;
+    }
+    
+    footer {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    
+    .small {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    
+    .controls-right {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    input[type="number"] {
+      width: 70px;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #e6eefc;
+    }
+    
+    .download {
+      background: #0656b8;
+      color: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      border: 0;
+    }
+    
+    @media (max-width: 920px) {
+      .panel {
+        grid-template-columns: 1fr;
+      }
+      .controls-right {
+        flex-direction: row;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='44' height='44'><rect rx='10' width='44' height='44' fill='%230b63d6'/><text x='50%' y='55%' font-size='20' font-family='Arial' text-anchor='middle' fill='white'>F</text></svg>"
+           alt="logo" style="width:44px;height:44px;border-radius:8px;" aria-label="Future Fortune Challenge Logo"/>
+      <div>
+        <h1>Future Fortune Challenge — Interactive (Style A)</h1>
+        <div class="small">Single-student 1-to-1 speaking game. Click <strong>Draw card</strong> to begin.</div>
+      </div>
+    </header>
+    
+    <div class="controls">
+      <button class="btn" id="drawBtn" aria-label="Draw card">🎴 Draw card</button>
+      <button class="btn ghost" id="switchBtn" aria-label="Switch tense">🔁 SWITCH TENSE</button>
+      
+      <label style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="followUp" aria-label="Require follow-up question"/>
+        Require follow-up question
+      </label>
+      
+      <label style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="autoKeep" aria-label="Auto-keep correct"/>
+        Auto-keep correct
+      </label>
+      
+      <div style="flex:1"></div>
+      
+      <div style="display:flex;align-items:center;gap:8px">
+        <label class="small">Cards left: <span id="leftCount" aria-live="polite">80</span></label>
+        <label class="small">Score: <span class="score" id="score" aria-live="polite">0</span></label>
+      </div>
+    </div>
+    
+    <div class="panel">
+      <main class="card">
+        <div class="prompt" id="promptArea" aria-live="polite">
+          Press <strong>Draw card</strong> to get a future prompt. Use it to elicit the target form.
+        </div>
+        
+        <div class="meta">
+          <div class="tag" id="promptTag" aria-live="polite">Ready</div>
+          <div class="small" id="promptSub">Selected deck: <strong>80 cards — Style A</strong></div>
+        </div>
+        
+        <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ghost" id="correctBtn" aria-label="Mark as correct">✅ Correct</button>
+          <button class="btn ghost" id="wrongBtn" aria-label="Mark as wrong">❌ Try again</button>
+          <button class="btn ghost" id="nextBtn" aria-label="Next card">➡️ Next (discard)</button>
+          <button class="btn" id="timerToggle" aria-live="polite">⏱️ Timer: Off</button>
+          <label class="small" style="margin-left:auto">Timer sec: 
+            <input id="timerSec" type="number" value="30" min="5" max="300" aria-label="Timer seconds"/>
+          </label>
+        </div>
+        
+        <hr style="margin:18px 0;border:none;border-top:1px solid #eef6ff" />
+        
+        <div class="small">
+          Tips: Ask a follow-up question to prompt more language. Use <strong>SWITCH TENSE</strong> to reformulate the student's answer in another future form.
+        </div>
+      </main>
+      
+      <aside class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>Deck filters</strong>
+          <button class="btn ghost" id="resetFilters" aria-label="Reset filters">Reset</button>
+        </div>
+        
+        <div style="margin-top:12px" class="filters" id="filters" aria-live="polite"></div>
+        
+        <hr style="margin:14px 0;border:none;border-top:1px solid #eef6ff" />
+        
+        <div>
+          <div class="small">Game options</div>
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+            <button class="chip" id="shuffleAll" aria-label="Shuffle deck">Shuffle deck</button>
+            <button class="chip" id="downloadBtn" aria-label="Download HTML">Download HTML</button>
+            <button class="chip" id="resetScore" aria-label="Reset score">Reset score</button>
+          </div>
+        </div>
+        
+        <hr style="margin:14px 0;border:none;border-top:1px solid #eef6ff" />
+        
+        <div>
+          <div class="small">Session notes</div>
+          <textarea id="notes" style="width:100%;height:140px;margin-top:8px;padding:10px;border-radius:8px;border:1px solid #eef6ff"
+                    placeholder="Add quick notes about the student or session..." aria-label="Session notes"></textarea>
+        </div>
+      </aside>
+    </div>
+    
+    <footer>
+      This is a single-file web app. To host publicly: upload the downloaded HTML to GitHub Pages, Netlify (Drag & Drop), or any static host.
+    </footer>
+  </div>
+
+  <script>
+// Constants
+const DECK = [
+  {id:1,cat:'WILL',text:'Your friend calls and asks you to help move now. What will you say?',sub:'Spontaneous decision / will'},
+  {id:2,cat:'WILL',text:'Predict one new technology people will use in 2040.',sub:'Prediction with will'},
+  {id:3,cat:'WILL',text:'Offer to carry my bag for me right now.',sub:'Offer using will'},
+  {id:4,cat:'WILL',text:'You see someone drop their phone. What will you do?',sub:'Immediate decision'},
+  {id:5,cat:'WILL',text:'Make a promise to yourself about next month.',sub:'Promise / will'},
+  {id:6,cat:'WILL',text:'Predict whether humans will live on Mars in 2050.',sub:'Prediction'},
+  {id:7,cat:'WILL',text:'You find a lost wallet. What will you do?',sub:'Spontaneous decision'},
+  {id:8,cat:'WILL',text:'Tell me three quick predictions about life in ten years.',sub:'Predictions list'},
+  {id:9,cat:'WILL',text:'Offer to explain something if I look confused right now.',sub:'Offer'},
+  {id:10,cat:'WILL',text:'Promise a small reward to motivate someone to study.',sub:'Promise'},
+  {id:11,cat:'BE GOING TO',text:'Tell me two personal goals you are going to start this year.',sub:'Plans / intentions'},
+  {id:12,cat:'BE GOING TO',text:'There are dark clouds outside. Make a prediction using evidence.',sub:'Evidence-based prediction'},
+  {id:13,cat:'BE GOING TO',text:'You have saved money. What are you going to buy?',sub:'Planned intention'},
+  {id:14,cat:'BE GOING TO',text:'Describe one big change you are going to make in your life.',sub:'Intention'},
+  {id:15,cat:'BE GOING TO',text:'A friend is coughing a lot. What are you going to do?',sub:'Intention / plan'},
+  {id:16,cat:'BE GOING TO',text:'How are you going to prepare for an important exam?',sub:'Plans'},
+  {id:17,cat:'BE GOING TO',text:'You see a wet floor sign — what are you going to do?',sub:'Evidence & plan'},
+  {id:18,cat:'BE GOING TO',text:'Say a future household purchase you are going to make.',sub:'Intention'},
+  {id:19,cat:'BE GOING TO',text:'Describe a holiday you are going to take next year.',sub:'Plan'},
+  {id:20,cat:'BE GOING TO',text:'Predict the outcome of a football match using current scores.',sub:'Evidence prediction'},
+  {id:21,cat:'PRESENT CONTINUOUS',text:'You already have plans for Saturday — describe them in detail.',sub:'Arrangements'},
+  {id:22,cat:'PRESENT CONTINUOUS',text:'Arrange a meeting with me next week (date/time/place).',sub:'Arrangement'},
+  {id:23,cat:'PRESENT CONTINUOUS',text:'You are organizing a surprise party — explain the arrangements.',sub:'Arrangement'},
+  {id:24,cat:'PRESENT CONTINUOUS',text:'Tell me about your travel arrangements for an upcoming trip.',sub:'Arrangements'},
+  {id:25,cat:'PRESENT CONTINUOUS',text:'Talk about a scheduled class you will attend this term.',sub:'Fixed plan'},
+  {id:26,cat:'PRESENT CONTINUOUS',text:'You have an appointment tomorrow — describe it.',sub:'Arrangement'},
+  {id:27,cat:'PRESENT CONTINUOUS',text:'Describe the plans for your next birthday.',sub:'Arrangement'},
+  {id:28,cat:'PRESENT CONTINUOUS',text:'Explain the timetable of activities for a workshop you arranged.',sub:'Arrangement'},
+  {id:29,cat:'PRESENT CONTINUOUS',text:'Talk about who is joining you on a planned trip and what you will do.',sub:'Arranged plans'},
+  {id:30,cat:'PRESENT CONTINUOUS',text:'Describe a sports practice schedule you have arranged for next month.',sub:'Arrangement'},
+  {id:31,cat:'FUTURE CONTINUOUS',text:'What will you be doing at 10pm tonight?',sub:'Action at a future moment'},
+  {id:32,cat:'FUTURE CONTINUOUS',text:'Where will you be living this time next year?',sub:'Future continuous'},
+  {id:33,cat:'FUTURE CONTINUOUS',text:'Imagine calling you in 10 years — describe what you will be doing.',sub:'Future action'},
+  {id:34,cat:'FUTURE CONTINUOUS',text:'What will you be studying at university next semester (if any)?',sub:'Future ongoing'},
+  {id:35,cat:'FUTURE CONTINUOUS',text:'At this time tomorrow, what will you be doing?',sub:'Specific future time'},
+  {id:36,cat:'FUTURE CONTINUOUS',text:'Describe an evening routine you will be doing next month on weekdays.',sub:'Ongoing future action'},
+  {id:37,cat:'FUTURE CONTINUOUS',text:'What will people be doing during the opening ceremony of a big event?',sub:'Future ongoing'},
+  {id:38,cat:'FUTURE CONTINUOUS',text:'Describe your morning five years from now — what will you be doing?',sub:'Future continuous'},
+  {id:39,cat:'FUTURE CONTINUOUS',text:'At 3pm on Friday, what will your classmate be doing?',sub:'Future action'},
+  {id:40,cat:'FUTURE CONTINUOUS',text:'Tell me about a future festival — what will attendees be doing?',sub:'Future ongoing'},
+  {id:41,cat:'FUTURE PERFECT',text:'By 2030, what will you have achieved?',sub:'Completed before a future point'},
+  {id:42,cat:'FUTURE PERFECT',text:'In five months, what goals will you have reached?',sub:'Future perfect'},
+  {id:43,cat:'FUTURE PERFECT',text:'Before you turn 60, what experiences will you have had?',sub:'Completed action'},
+  {id:44,cat:'FUTURE PERFECT',text:'By the time you graduate, what will you have learned?',sub:'Future perfect'},
+  {id:45,cat:'FUTURE PERFECT',text:'By next summer, what will you have saved for?',sub:'Completed before a deadline'},
+  {id:46,cat:'FUTURE PERFECT',text:'Before the meeting starts, what will you have prepared?',sub:'Preparation completed'},
+  {id:47,cat:'FUTURE PERFECT',text:'By the end of the year, what project will you have finished?',sub:'Completed project'},
+  {id:48,cat:'FUTURE PERFECT',text:'By tomorrow morning, what tasks will you have completed?',sub:'Short-term future perfect'},
+  {id:49,cat:'FUTURE PERFECT',text:'By the time the show begins, what will the crew have done?',sub:'Completed action by a time'},
+  {id:50,cat:'FUTURE PERFECT',text:'Before you move house, what will you have arranged?',sub:'Completed arrangements'},
+  {id:51,cat:'FUTURE PASSIVE',text:'Describe how a new gadget will be used — use passive (will be + past participle).',sub:'Future passive'},
+  {id:52,cat:'FUTURE PASSIVE',text:'How might education be changed by technology? Use passive/modal.',sub:'Modal + passive'},
+  {id:53,cat:'FUTURE PASSIVE',text:'Predict how transport will be affected by new laws (passive).',sub:'Future passive'},
+  {id:54,cat:'FUTURE PASSIVE',text:'How will traditional jobs be replaced or changed? Use passive.',sub:'Passive prediction'},
+  {id:55,cat:'FUTURE PASSIVE',text:'Explain how a building will be designed in the future (passive).',sub:'Passive future'},
+  {id:56,cat:'FUTURE PASSIVE',text:'What rules might be introduced and how will they be enforced? (modal + passive)',sub:'Modal passive'},
+  {id:57,cat:'FUTURE PASSIVE',text:'Describe how a city will be renovated — use future passive.',sub:'Passive'},
+  {id:58,cat:'FUTURE PASSIVE',text:'How will online classes be assessed in five years? Use passive construction.',sub:'Passive future'},
+  {id:59,cat:'FUTURE PASSIVE',text:'Predict how food will be produced (passive voice).',sub:'Passive'},
+  {id:60,cat:'FUTURE PASSIVE',text:'How will personal data be protected? Use passive and modal verbs.',sub:'Modal + passive'},
+  {id:61,cat:'MODAL FUTURE',text:'What might be the main health concerns in 2035?',sub:'Modal prediction'},
+  {id:62,cat:'MODAL FUTURE',text:'How should governments prepare for climate change? Use modal + future.',sub:'Modal advice'},
+  {id:63,cat:'MODAL FUTURE',text:'What could happen if AI is used without regulation?',sub:'Modal warning'},
+  {id:64,cat:'MODAL FUTURE',text:'What may change about shopping habits in the future?',sub:'Modal speculation'},
+  {id:65,cat:'MODAL FUTURE',text:'Which jobs might disappear and which might appear?',sub:'Modal prediction'},
+  {id:66,cat:'MODAL FUTURE',text:'What would you do if automated driving becomes standard?',sub:'Modal conditional'},
+  {id:67,cat:'MODAL FUTURE',text:'How might holidays be different in 20 years?',sub:'Modal speculation'},
+  {id:68,cat:'MODAL FUTURE',text:'What could schools do to prepare students for future jobs?',sub:'Modal suggestion'},
+  {id:69,cat:'MODAL FUTURE',text:'What should companies do to keep workers happy in the future?',sub:'Modal recommendation'},
+  {id:70,cat:'MODAL FUTURE',text:'How might cities change to become greener? Use modal verbs.',sub:'Modal + future'},
+  {id:71,cat:'MIX',text:'Describe your ideal day in ten years using at least two different future forms.',sub:'Mixed forms'},
+  {id:72,cat:'MIX',text:'Role-play a job interview where the interviewer asks about your plans and predictions.',sub:'Mixed forms'},
+  {id:73,cat:'MIX',text:'Tell a short story about a future event using will, going to and present continuous.',sub:'Mixed forms'},
+  {id:74,cat:'MIX',text:'Make two predictions and one plan for the next year; use three different future structures.',sub:'Mixed'},
+  {id:75,cat:'MIX',text:'Ask me three future questions about my career using different future tenses.',sub:'Student asks'},
+  {id:76,cat:'MIX',text:'Describe a future holiday and explain which parts are planned and which parts are predictions.',sub:'Mixed'},
+  {id:77,cat:'MIX',text:'Invent a future law and explain how it will be applied (use passive + modal).',sub:'Mixed'},
+  {id:78,cat:'MIX',text:'Predict a technological change and explain how people will be affected, using two future forms.',sub:'Mixed'},
+  {id:79,cat:'MIX',text:'Prepare a 1-minute forecast of your week using at least three different future forms.',sub:'Mixed'},
+  {id:80,cat:'MIX',text:'Create a short dialogue (2 lines) using two future continuous forms.',sub:'Mixed'}
+];
+
+// App State
+let activeDeck = DECK.slice();
+let availableIds = new Set(activeDeck.map(d => d.id));
+let current = null;
+let score = 0;
+let timer = null;
+let timerOn = false;
+
+// UI Refs
+const promptArea = document.getElementById('promptArea');
+const promptTag = document.getElementById('promptTag');
+const leftCount = document.getElementById('leftCount');
+const scoreEl = document.getElementById('score');
+const drawBtn = document.getElementById('drawBtn');
+const correctBtn = document.getElementById('correctBtn');
+const wrongBtn = document.getElementById('wrongBtn');
+const nextBtn = document.getElementById('nextBtn');
+const switchBtn = document.getElementById('switchBtn');
+const filtersDiv = document.getElementById('filters');
+const resetFilters = document.getElementById('resetFilters');
+const shuffleAll = document.getElementById('shuffleAll');
+const downloadBtn = document.getElementById('downloadBtn');
+const resetScore = document.getElementById('resetScore');
+const timerToggle = document.getElementById('timerToggle');
+const timerSecInput = document.getElementById('timerSec');
+
+// Constants for UI
+const READY_TEXT = 'Ready';
+const EMPTY_TEXT = 'No cards in the current filter. Reset filters or add categories.';
+
+// Initialize the app
+function initApp() {
+  renderFilters();
+  updateActiveDeck();
+  scoreEl.textContent = score;
+  leftCount.textContent = activeDeck.length;
+  setupEventListeners();
+}
+
+// Render filter chips
+function renderFilters() {
+  filtersDiv.innerHTML = '';
+  const cats = [...new Set(DECK.map(d => d.cat))];
+  cats.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.textContent = cat;
+    btn.style.opacity = activeCats.has(cat) ? 1 : 0.45;
+    btn.onclick = () => toggleFilter(cat);
+    filtersDiv.appendChild(btn);
+  });
+}
+
+// Toggle filter
+let activeCats = new Set([...new Set(DECK.map(d => d.cat))]);
+function toggleFilter(cat) {
+  if (activeCats.has(cat)) {
+    activeCats.delete(cat);
+  } else {
+    activeCats.add(cat);
+  }
+  updateActiveDeck();
+  renderFilters();
+}
+
+// Update active deck based on filters
+function updateActiveDeck() {
+  activeDeck = DECK.filter(d => activeCats.has(d.cat));
+  availableIds = new Set(activeDeck.map(d => d.id));
+  leftCount.textContent = activeDeck.length;
+}
+
+// Pick a random card
+function pickCard() {
+  if (activeDeck.length === 0) {
+    promptArea.textContent = EMPTY_TEXT;
+    promptTag.textContent = 'Empty';
+    return;
+  }
+  const idx = Math.floor(Math.random() * activeDeck.length);
+  current = { ...activeDeck[idx] };
+  promptArea.textContent = current.text;
+  promptTag.textContent = current.cat;
+}
+
+// Remove current card from deck
+function removeCurrentFromDeck() {
+  if (!current) return;
+  const idx = activeDeck.findIndex(d => d.id === current.id);
+  if (idx >= 0) activeDeck.splice(idx, 1);
+  current = null;
+  promptArea.textContent = 'Press Draw card';
+  promptTag.textContent = READY_TEXT;
+  leftCount.textContent = activeDeck.length;
+}
+
+// Suggest a tense switch
+function suggestSwitch(card) {
+  const map = {
+    'WILL': 'BE GOING TO',
+    'BE GOING TO': 'PRESENT CONTINUOUS',
+    'PRESENT CONTINUOUS': 'FUTURE CONTINUOUS',
+    'FUTURE CONTINUOUS': 'FUTURE PERFECT',
+    'FUTURE PERFECT': 'FUTURE PASSIVE',
+    'FUTURE PASSIVE': 'MODAL FUTURE',
+    'MODAL FUTURE': 'WILL',
+    'MIX': 'WILL'
+  };
+  const target = map[card.cat] || 'WILL';
+  return { cat: target, text: `(Reformulate) ${card.text} — now answer using: ${target}` };
+}
+
+// Timer functions
+function startTimer() {
+  stopTimer();
+  let sec = parseInt(timerSecInput.value) || 30;
+  let t = sec;
+  timerToggle.textContent = `⏱️ ${t}s left`;
+  timer = setInterval(() => {
+    t--;
+    timerToggle.textContent = `⏱️ ${t}s left`;
+    if (t <= 0) {
+      clearInterval(timer);
+      timer = null;
+      timerToggle.textContent = '⏱️ Time!';
+      alert('Time! Encourage student to finish.');
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+    timerToggle.textContent = timerOn ? '⏱️ Timer: On' : '⏱️ Timer: Off';
+  }
+}
+
+// Download HTML
+function downloadHTML() {
+  const html = `<!doctype html>
+${document.documentElement.outerHTML}`;
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'future-fortune-challenge.html';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Setup event listeners
+function setupEventListeners() {
+  drawBtn.onclick = () => {
+    pickCard();
+    if (timerOn) startTimer();
+  };
+  
+  correctBtn.onclick = () => {
+    score++;
+    scoreEl.textContent = score;
+    if (document.getElementById('autoKeep').checked) {
+      removeCurrentFromDeck();
+    }
+    stopTimer();
+  };
+  
+  wrongBtn.onclick = () => {
+    score = Math.max(0, score - 1);
+    scoreEl.textContent = score;
+    stopTimer();
+  };
+  
+  nextBtn.onclick = () => {
+    removeCurrentFromDeck();
+    stopTimer();
+  };
+  
+  switchBtn.onclick = () => {
+    if (!current) return alert('Draw a card first.');
+    const alt = suggestSwitch(current);
+    promptArea.textContent = alt.text;
+    promptTag.textContent = `${alt.cat} (SWITCH)`;
+  };
+  
+  shuffleAll.onclick = () => {
+    activeDeck = DECK.slice();
+    renderFilters();
+    updateActiveDeck();
+    score = 0;
+    scoreEl.textContent = 0;
+    promptArea.textContent = 'Deck shuffled! Press Draw card.';
+    leftCount.textContent = activeDeck.length;
+  };
+  
+  resetFilters.onclick = () => {
+    activeCats = new Set([...new Set(DECK.map(d => d.cat))]);
+    renderFilters();
+    updateActiveDeck();
+  };
+  
+  resetScore.onclick = () => {
+    score = 0;
+    scoreEl.textContent = 0;
+  };
+  
+  timerToggle.onclick = () => {
+    timerOn = !timerOn;
+    timerToggle.textContent = timerOn ? '⏱️ Timer: On' : '⏱️ Timer: Off';
+    if (!timerOn) stopTimer();
+  };
+  
+  downloadBtn.onclick = downloadHTML;
+}
+
+// Initialize the app
+initApp();
+
+    // Script will be added in the next step
+  </script>
+</body>
+</html>
